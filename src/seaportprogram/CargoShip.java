@@ -12,8 +12,6 @@ public class CargoShip extends Ship {
 		cargoWeight = lineSc.nextDouble();
 		cargoVolume = lineSc.nextDouble();
 		cargoValue = lineSc.nextDouble();
-		super.addToLists(elements);
-		
 		elements.put(id, this);
 	}
 

@@ -15,7 +15,5 @@ public class PassengerShip extends Ship{
 		numberOfRooms = lineSc.nextInt();
 		numberOfOccupiedRooms = lineSc.nextInt();
 		
-		super.addToLists(elements);
-		
 	}
 }

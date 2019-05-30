@@ -15,7 +15,6 @@ public class PortTime {
     
     //constructor
     public PortTime(){
-        this.time = time;
     }
     
     //getter method

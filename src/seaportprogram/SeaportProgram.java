@@ -1,6 +1,10 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -8,10 +12,15 @@ import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-public class SeaportProgram extends JFrame{
+public class SeaportProgram extends JFrame implements ItemListener{
 
 	File fileContents;
 	World world = new World();
+	JPanel mainPanel = new JPanel();
+	JPanel portPanel = new JPanel();
+	JTextArea textArea = new JTextArea(20, 80);
+	JPanel shipsArea = new JPanel();
+	JScrollPane docksPanel = new JScrollPane(shipsArea);
 	
 	
 	
@@ -22,9 +31,25 @@ public class SeaportProgram extends JFrame{
 		setFrame(1800,700);
 		selectFile();
 		readFile(fileContents);
-	
 		
+		mainPanel.setBorder(BorderFactory.createTitledBorder("Progress View"));
+		mainPanel.setLayout(new GridLayout(0, 2, 5, 5));
+		
+		portPanel.setBorder(BorderFactory.createTitledBorder("Seaports"));
+		mainPanel.add(portPanel);
+		
+		shipsArea.setLayout(new GridLayout(0, 1, 5, 5));
+		docksPanel.setBorder(BorderFactory.createTitledBorder("Ports"));
+		docksPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		mainPanel.add(docksPanel);
+		mainPanel.revalidate();
+		add(mainPanel);
+		revalidate();
+		repaint();
 	}
+	
+	
+	
 	
 	private void readFile(File file) {
 		
@@ -41,6 +66,7 @@ public class SeaportProgram extends JFrame{
 					 switch(token) {
 					 case "port":
 						 addPort(lineSc, elements);
+						 
 						 //System.out.println(world.seaports.size());
 						 //System.out.println(elements.size());
 						 break;
@@ -59,16 +85,19 @@ public class SeaportProgram extends JFrame{
 					 case "job":
 						 addJob(lineSc, elements);
 					 }
-					
-						 
-					 
 				 }
 			}
 			for(Seaport port : world.seaports) {
 				System.out.println("Stats for port " + port.name + ": ");
 				System.out.println("Number of docks: "+ port.docks.size());
+				shipsArea.add(port.dockedPanel);
+				
 				for(Dock dock : port.docks) {
 					System.out.println("Ship in dock " + dock.name + " : " + dock.ship.name);
+					if (!dock.ship.jobs.isEmpty()) {
+						port.dockedPanel.add(dock.dockContainer);
+					}
+					
 				}
 				//System.out.println("ships portbound: " + port.ships.size());
 				//System.out.println("queue size :" + port.que.size());
@@ -101,10 +130,15 @@ public class SeaportProgram extends JFrame{
 
 	private void addCship(Scanner lineSc, HashMap<Integer, Thing> elements) {
 		CargoShip cship = new CargoShip(lineSc, elements);
+		addToLists(cship, elements);
+		elements.put(cship.id, cship);
+		
 	}
 
 	private void addPship(Scanner lineSc, HashMap<Integer, Thing> elements) {
 		PassengerShip pship = new PassengerShip(lineSc, elements);
+		addToLists(pship, elements);
+		elements.put(pship.id, pship);
 	}
 
 	private void addDock(Scanner lineSc, HashMap<Integer, Thing> elements) {
@@ -120,8 +154,33 @@ public class SeaportProgram extends JFrame{
 		Seaport port = new Seaport(lineSc, elements);
 		elements.put(port.id, port);
 		world.seaports.add(port);
+		JCheckBox newButton = new JCheckBox(port.name);
+		newButton.setSelected(true);
+		newButton.addItemListener(this);
+		portPanel.add(newButton);
+	
 		//System.out.println("port added: " + port.name);
 		//System.out.println("Number of ports: " + world.seaports.size());
+	}
+	
+	public void itemStateChanged(ItemEvent e) {
+		Object source = e.getItem();
+		String text = ((JCheckBox)source).getText();
+		Boolean isSelected = ((JCheckBox)source).isSelected();
+		
+		for (Seaport port : world.seaports) {
+			if (port.name == text) {
+				for(Dock dock : port.docks) {
+					if (isSelected == false) {
+						shipsArea.remove(dock.ship.jobPanel);
+					}
+					else if(isSelected == true) {
+						shipsArea.add(dock.ship.jobPanel);
+					}
+				}
+				shipsArea.revalidate();
+			}
+		}
 	}
 
 	//readFile
@@ -141,7 +200,22 @@ public class SeaportProgram extends JFrame{
         }
 	}
 	
-	
+	public void addToLists(Ship ship, HashMap<Integer, Thing> elements) {
+		if(ship.parent.getClass() == Seaport.class) {
+			((Seaport) elements.get(ship.parent.id)).ships.add(ship);
+			((Seaport) elements.get(ship.parent.id)).que.add(ship);
+			
+		}
+		else if(ship.parent.getClass() == Dock.class) {
+			((Seaport) elements.get(ship.parent.parent.id)).ships.add(ship);
+			((Dock) elements.get(ship.parent.id)).ship = ship;
+			((Dock)ship.parent).dockContainer.add(ship.jobPanel);
+			((Dock)ship.parent).dockContainer.revalidate();
+			
+		}
+		
+		elements.put(ship.id, ship);
+	}
 	
 	//sets the frame for the GUI
 	public void setFrame(int width, int height) {
