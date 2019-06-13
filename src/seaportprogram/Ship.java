@@ -14,6 +14,7 @@ public class Ship extends Thing{
 	double width;
 	double draft;
 	boolean docked;
+	boolean isBusy;
 	
 	ArrayList<Job> jobs = new ArrayList<>();
 	JPanel jobPanel = new JPanel();
@@ -49,8 +50,23 @@ public class Ship extends Thing{
 	}
 	
 	public boolean isDocked() {
-		return true;
+		return docked;
 	}
+	
+	public boolean isBusy() {
+		return isBusy;
+		
+	}
+	
+	public void launchShip() {
+		
+	}
+	
+	public void dockShip() {
+		
+	}
+	
+	
 	
 	
 	
