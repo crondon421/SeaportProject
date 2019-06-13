@@ -7,13 +7,16 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 
-public class Job extends Thing{
+import sun.nio.cs.ext.ISCII91;
+
+public class Job extends Thing implements Runnable{
 	
 	Double jobDuration;
 	ArrayList<String> requirements = new ArrayList<>();
 	ArrayList<Person> workers = new ArrayList<>();
 	JPanel containerPanel = new JPanel();
 	JProgressBar pbar = new JProgressBar(0,100);
+	Ship parent;
 	
 	public Job(Scanner lineSc, HashMap<Integer, Thing> elements) {
 		
@@ -25,13 +28,23 @@ public class Job extends Thing{
 		}
 		elements.put(this.id, this);
 		((Ship)parent).jobs.add(this);
+		
 		pbar.setStringPainted(true);
-		pbar.setValue (0);
-		containerPanel.add(new JLabel(name), JLabel.CENTER);
-		containerPanel.add(pbar);
-		((Ship)parent).jobPanel.add(containerPanel);
-		((Ship)parent).jobPanel.revalidate();
+		pbar.setValue(0);
 	}
+
+	@Override
+	public void run() {
+		
+		long time = System.currentTimeMillis();
+		long startTime = time;
+		double stopTime = time + (1000 * jobDuration);
+		double duration = stopTime - time;
+		
+		
+	}
+	
+	
 	
 	
 }

@@ -1,7 +1,6 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -12,38 +11,56 @@ import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+
+import com.sun.org.apache.bcel.internal.generic.NEW;
+import com.sun.rowset.internal.Row;
+
+import javafx.scene.Parent;
+import sun.java2d.pipe.ShapeSpanIterator;
+
+
 public class SeaportProgram extends JFrame implements ItemListener{
 
-	File fileContents;
-	World world = new World();
-	JPanel mainPanel = new JPanel();
+	
+	File fileContents; 
+	World world = new World();	
+	JPanel mainContainer = new JPanel();
 	JPanel portPanel = new JPanel();
-	JTextArea textArea = new JTextArea(20, 80);
-	JPanel shipsArea = new JPanel();
-	JScrollPane docksPanel = new JScrollPane(shipsArea);
-	
-	
-	
+	DefaultTableModel model = new DefaultTableModel();
+	ProgressBarRenderer pbr = new ProgressBarRenderer(0, 100);
+	JTable shipsTable = new JTable(model);
+	JScrollPane docksPanel = new JScrollPane(shipsTable);
+	final String[] COLUMN_NAMES = {"Ship name",  "Port", "Dock",  "Job", "Progress"};
+	Object[] columnTypes = {"String", "String", "String", "String",  new JProgressBar(0, 100)};
 	
 	//Constructor
 	public SeaportProgram() throws FileNotFoundException {
+		
 		super ("Seaport Program");
+		model.setColumnIdentifiers(COLUMN_NAMES);
+		shipsTable.getColumn("Progress").setCellRenderer(pbr);
 		setFrame(1800,700);
 		selectFile();
 		readFile(fileContents);
 		
-		mainPanel.setBorder(BorderFactory.createTitledBorder("Progress View"));
-		mainPanel.setLayout(new GridLayout(0, 2, 5, 5));
+
+
+		
+		
+		mainContainer.setBorder(BorderFactory.createTitledBorder("Progress View"));
+		mainContainer.setLayout(new GridLayout(0, 2, 5, 5));
 		
 		portPanel.setBorder(BorderFactory.createTitledBorder("Seaports"));
-		mainPanel.add(portPanel);
+		mainContainer.add(portPanel); 
 		
-		shipsArea.setLayout(new GridLayout(0, 1, 5, 5));
 		docksPanel.setBorder(BorderFactory.createTitledBorder("Ports"));
 		docksPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		mainPanel.add(docksPanel);
-		mainPanel.revalidate();
-		add(mainPanel);
+		docksPanel.revalidate();
+		mainContainer.add(docksPanel);
+		mainContainer.revalidate();
+		add(mainContainer);
 		revalidate();
 		repaint();
 	}
@@ -90,12 +107,13 @@ public class SeaportProgram extends JFrame implements ItemListener{
 			for(Seaport port : world.seaports) {
 				System.out.println("Stats for port " + port.name + ": ");
 				System.out.println("Number of docks: "+ port.docks.size());
-				shipsArea.add(port.dockedPanel);
+				//shipsArea.add(port.dockedPanel);
 				
 				for(Dock dock : port.docks) {
 					System.out.println("Ship in dock " + dock.name + " : " + dock.ship.name);
 					if (!dock.ship.jobs.isEmpty()) {
-						port.dockedPanel.add(dock.dockContainer);
+						for (Job job : dock.ship.jobs) {
+						}
 					}
 					
 				}
@@ -116,7 +134,8 @@ public class SeaportProgram extends JFrame implements ItemListener{
 
 	private void addJob(Scanner lineSc, HashMap<Integer, Thing> elements) {
 		Job job = new Job(lineSc, elements);
-		
+		Object[] newRow = {job.parent.name, ((Ship)job.parent).getParentPort().name, ((Ship)job.parent).getParentDock(), job.name, job.pbar};
+		model.addRow(newRow);
 	}
 
 	private void addPerson(Scanner lineSc, HashMap<Integer, Thing> elements) {
@@ -172,13 +191,13 @@ public class SeaportProgram extends JFrame implements ItemListener{
 			if (port.name == text) {
 				for(Dock dock : port.docks) {
 					if (isSelected == false) {
-						shipsArea.remove(dock.ship.jobPanel);
+						shipsTable.remove(dock.ship.jobPanel);
 					}
 					else if(isSelected == true) {
-						shipsArea.add(dock.ship.jobPanel);
+						shipsTable.add(dock.ship.jobPanel);
 					}
 				}
-				shipsArea.revalidate();
+				shipsTable.revalidate();
 			}
 		}
 	}
@@ -207,6 +226,7 @@ public class SeaportProgram extends JFrame implements ItemListener{
 			
 		}
 		else if(ship.parent.getClass() == Dock.class) {
+			ship.docked = true;
 			((Seaport) elements.get(ship.parent.parent.id)).ships.add(ship);
 			((Dock) elements.get(ship.parent.id)).ship = ship;
 			((Dock)ship.parent).dockContainer.add(ship.jobPanel);

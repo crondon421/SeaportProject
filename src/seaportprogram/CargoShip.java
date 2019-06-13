@@ -13,6 +13,6 @@ public class CargoShip extends Ship {
 		cargoVolume = lineSc.nextDouble();
 		cargoValue = lineSc.nextDouble();
 		elements.put(id, this);
+		
 	}
-
 }

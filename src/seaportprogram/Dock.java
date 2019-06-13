@@ -1,3 +1,4 @@
+import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -16,6 +17,7 @@ public class Dock extends Thing{
 	public Dock(Scanner lineSc, HashMap<Integer, Thing> elements) {
 		super(lineSc, elements);
 		dockContainer.setBorder(BorderFactory.createTitledBorder(name));
+		dockContainer.setLayout(new GridLayout(0, 1, 5, 5));
 	}
 	
 }

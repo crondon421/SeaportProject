@@ -15,4 +15,22 @@ public class Thing {
         id = sc.nextInt();
         parent = elements.get(sc.nextInt());
     }
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Thing getParent() {
+		return parent;
+	}
+	public void setParent(Thing parent) {
+		this.parent = parent;
+	}
 }
